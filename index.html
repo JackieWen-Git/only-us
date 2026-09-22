@@ -35,7 +35,6 @@
       overflow: hidden;
     }
 
-    /* Desktop phone frame */
     .phone-shell {
       width: 100%;
       max-width: 390px;
@@ -65,39 +64,56 @@
       }
     }
 
-    /* Screens */
     .screens {
       flex: 1;
       position: relative;
       overflow: hidden;
     }
 
+    /* ========== Screen transitions: fade + slide ========== */
     .screen {
       position: absolute;
       inset: 0;
       padding: 20px 20px calc(72px + var(--safe-bottom));
       opacity: 0;
       visibility: hidden;
-      transform: translateX(30px);
-      transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s;
+      pointer-events: none;
+      transform: translateX(28px) scale(0.985);
+      transition:
+        opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0.42s;
       overflow-y: auto;
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
+      will-change: transform, opacity;
     }
 
     .screen.active {
       opacity: 1;
       visibility: visible;
-      transform: translateX(0);
+      pointer-events: auto;
+      transform: translateX(0) scale(1);
       z-index: 2;
     }
 
     .screen.exit-left {
-      transform: translateX(-30px);
+      transform: translateX(-28px) scale(0.985);
       opacity: 0;
+      z-index: 1;
     }
 
-    /* Splash */
+    .screen.exit-right {
+      transform: translateX(28px) scale(0.985);
+      opacity: 0;
+      z-index: 1;
+    }
+
+    .screen.enter-from-left {
+      transform: translateX(-28px) scale(0.985);
+    }
+
+    /* ========== Splash ========== */
     #screen-splash {
       display: flex;
       flex-direction: column;
@@ -107,25 +123,94 @@
       background: linear-gradient(180deg, #fdf0f5 0%, #f5e8f8 50%, #fdeee8 100%);
       padding-bottom: 40px;
       cursor: pointer;
+      z-index: 5;
+    }
+
+    #screen-splash.unlocked {
+      animation: splashUnlock 0.55s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+      pointer-events: none;
+    }
+
+    @keyframes splashUnlock {
+      0% { transform: scale(1); opacity: 1; }
+      45% { transform: scale(1.06); opacity: 1; }
+      100% { transform: scale(1.12); opacity: 0; }
+    }
+
+    .splash-particles {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .splash-particle {
+      position: absolute;
+      font-size: 14px;
+      opacity: 0;
+      animation: particleFloat linear infinite;
+      will-change: transform, opacity;
+    }
+
+    @keyframes particleFloat {
+      0% {
+        transform: translateY(20px) scale(0.6) rotate(0deg);
+        opacity: 0;
+      }
+      12% { opacity: 0.7; }
+      70% { opacity: 0.45; }
+      100% {
+        transform: translateY(-110vh) scale(1.1) rotate(40deg);
+        opacity: 0;
+      }
+    }
+
+    .splash-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .splash-heart {
-      width: 88px;
-      height: 88px;
+      width: 96px;
+      height: 96px;
       border-radius: 50%;
       background: linear-gradient(135deg, var(--pink), var(--lavender));
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 40px;
-      box-shadow: var(--shadow);
-      animation: floatPulse 2.4s ease-in-out infinite;
+      font-size: 44px;
+      box-shadow: var(--shadow), 0 0 0 0 rgba(232, 137, 159, 0.4);
+      animation: floatPulse 2.4s ease-in-out infinite, heartGlow 2.4s ease-in-out infinite;
       margin-bottom: 28px;
+      position: relative;
+    }
+
+    .splash-heart::before {
+      content: "";
+      position: absolute;
+      inset: -12px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(232, 137, 159, 0.35);
+      animation: ringPulse 2.4s ease-out infinite;
     }
 
     @keyframes floatPulse {
       0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-10px) scale(1.04); }
+      50% { transform: translateY(-10px) scale(1.05); }
+    }
+
+    @keyframes heartGlow {
+      0%, 100% { box-shadow: var(--shadow), 0 0 0 0 rgba(232, 137, 159, 0.35); }
+      50% { box-shadow: var(--shadow), 0 0 28px 6px rgba(232, 137, 159, 0.28); }
+    }
+
+    @keyframes ringPulse {
+      0% { transform: scale(0.92); opacity: 0.7; }
+      100% { transform: scale(1.35); opacity: 0; }
     }
 
     .splash-lock {
@@ -134,7 +219,7 @@
       color: var(--text-soft);
       margin-bottom: 12px;
       opacity: 0;
-      animation: fadeUp 0.8s 0.3s forwards;
+      animation: fadeUp 0.8s 0.25s forwards;
     }
 
     .splash-title {
@@ -144,14 +229,46 @@
       letter-spacing: 0.08em;
       margin-bottom: 8px;
       opacity: 0;
-      animation: fadeUp 0.8s 0.5s forwards;
+      animation: fadeUp 0.8s 0.45s forwards;
     }
 
     .splash-sub {
       font-size: 15px;
       color: var(--text-soft);
       opacity: 0;
-      animation: fadeUp 0.8s 0.7s forwards;
+      animation: fadeUp 0.8s 0.65s forwards;
+    }
+
+    .splash-match-area {
+      margin-top: 36px;
+      width: 220px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.9s forwards;
+    }
+
+    .splash-match-text {
+      font-size: 13px;
+      color: var(--rose);
+      margin-bottom: 10px;
+      letter-spacing: 0.04em;
+      min-height: 20px;
+      transition: opacity 0.3s;
+    }
+
+    .splash-progress-track {
+      height: 4px;
+      background: rgba(232, 137, 159, 0.2);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .splash-progress-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--pink-deep), var(--lavender-deep));
+      transition: width 0.15s linear;
+      box-shadow: 0 0 8px rgba(232, 137, 159, 0.5);
     }
 
     .splash-hint {
@@ -163,7 +280,12 @@
       font-size: 13px;
       color: var(--text-soft);
       opacity: 0;
-      animation: fadeBlink 2s 1.5s infinite;
+      z-index: 1;
+      transition: opacity 0.4s;
+    }
+
+    .splash-hint.ready {
+      animation: fadeBlink 2s infinite;
     }
 
     @keyframes fadeUp {
@@ -173,10 +295,10 @@
 
     @keyframes fadeBlink {
       0%, 100% { opacity: 0.35; }
-      50% { opacity: 0.9; }
+      50% { opacity: 0.95; }
     }
 
-    /* Top bar */
+    /* ========== Top bar ========== */
     .topbar {
       display: flex;
       align-items: center;
@@ -200,6 +322,17 @@
       letter-spacing: 0;
     }
 
+    /* ========== Micro-interactions ========== */
+    .icon-btn, .back-btn, .btn-primary, .btn-ghost,
+    .btn-accept, .btn-maybe, .btn-another, .send-btn, .nav-item {
+      transition:
+        transform 0.18s cubic-bezier(0.34, 1.4, 0.64, 1),
+        box-shadow 0.2s,
+        background 0.2s,
+        color 0.2s,
+        filter 0.2s;
+    }
+
     .icon-btn {
       width: 40px;
       height: 40px;
@@ -212,12 +345,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.2s;
     }
 
-    .icon-btn:active { transform: scale(0.92); }
+    .icon-btn:hover { transform: scale(1.06); }
+    .icon-btn:active { transform: scale(0.88); }
 
-    /* Match card */
+    .pressable:active { transform: scale(0.96); }
+
+    /* ========== Match card + reveal ========== */
     .match-card {
       background: var(--white);
       border-radius: var(--radius);
@@ -225,9 +360,31 @@
       overflow: hidden;
       cursor: pointer;
       transition: transform 0.25s ease, box-shadow 0.25s;
+      position: relative;
+      opacity: 0;
+      transform: translateY(48px) scale(0.92) rotate(-1.5deg);
     }
 
-    .match-card:active { transform: scale(0.98); }
+    .match-card.revealed {
+      animation: cardFlyIn 0.7s cubic-bezier(0.22, 1.2, 0.36, 1) forwards;
+    }
+
+    @keyframes cardFlyIn {
+      0% {
+        opacity: 0;
+        transform: translateY(56px) scale(0.88) rotate(-2deg);
+      }
+      60% {
+        opacity: 1;
+        transform: translateY(-6px) scale(1.02) rotate(0.5deg);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1) rotate(0);
+      }
+    }
+
+    .match-card:active { transform: scale(0.975); }
 
     .match-photo {
       height: 320px;
@@ -236,6 +393,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: hidden;
     }
 
     .avatar-ring {
@@ -248,6 +406,7 @@
       justify-content: center;
       box-shadow: 0 12px 40px rgba(196, 92, 122, 0.25);
       position: relative;
+      z-index: 1;
     }
 
     .avatar-ring::after {
@@ -256,6 +415,15 @@
       inset: -6px;
       border-radius: 50%;
       border: 2px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .match-card.revealed .avatar-ring {
+      animation: avatarPop 0.6s 0.35s cubic-bezier(0.34, 1.5, 0.64, 1) both;
+    }
+
+    @keyframes avatarPop {
+      0% { transform: scale(0.6); }
+      100% { transform: scale(1); }
     }
 
     .avatar-initial {
@@ -277,6 +445,18 @@
       color: var(--rose);
       font-weight: 500;
       box-shadow: var(--shadow-sm);
+      z-index: 2;
+      opacity: 0;
+      transform: translateY(-8px) scale(0.9);
+    }
+
+    .match-card.revealed .only-badge {
+      animation: badgePop 0.5s 0.55s cubic-bezier(0.34, 1.5, 0.64, 1) forwards;
+    }
+
+    @keyframes badgePop {
+      0% { opacity: 0; transform: translateY(-8px) scale(0.85); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     .match-info {
@@ -295,11 +475,12 @@
     .match-name .heart-mini {
       font-size: 16px;
       animation: heartbeat 1.5s ease-in-out infinite;
+      display: inline-block;
     }
 
     @keyframes heartbeat {
       0%, 100% { transform: scale(1); }
-      15% { transform: scale(1.2); }
+      15% { transform: scale(1.25); }
       30% { transform: scale(1); }
     }
 
@@ -317,6 +498,12 @@
       background: linear-gradient(90deg, #fdf0f5, #f5eef8);
       border-radius: 12px;
       padding: 10px 14px;
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    .match-card.revealed .compat-bar {
+      animation: fadeUp 0.5s 0.7s forwards;
     }
 
     .compat-score {
@@ -324,6 +511,15 @@
       font-weight: 700;
       color: var(--rose);
       min-width: 48px;
+    }
+
+    .compat-score.counting {
+      animation: scorePulse 0.35s ease;
+    }
+
+    @keyframes scorePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
     }
 
     .compat-label {
@@ -336,10 +532,79 @@
       margin-top: 16px;
       font-size: 13px;
       color: var(--text-soft);
-      opacity: 0.8;
+      opacity: 0;
     }
 
-    /* Profile */
+    .hint-tap.show {
+      animation: fadeBlink 2.2s 0.3s infinite;
+    }
+
+    .home-only-note {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-soft);
+      line-height: 1.6;
+      padding: 0 12px;
+      opacity: 0;
+      transition: opacity 0.6s 0.9s;
+    }
+
+    .home-only-note.show { opacity: 1; }
+
+    /* Heart burst / confetti layer */
+    .burst-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 15;
+      overflow: hidden;
+    }
+
+    .burst-heart {
+      position: absolute;
+      left: 50%;
+      top: 42%;
+      font-size: 18px;
+      opacity: 0;
+      will-change: transform, opacity;
+    }
+
+    .burst-heart.go {
+      animation: heartBurst 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes heartBurst {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.3) rotate(0deg);
+      }
+      25% { opacity: 1; }
+      100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.1) rotate(var(--rot));
+      }
+    }
+
+    .match-flash {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 40%, rgba(255,255,255,0.7), transparent 60%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .match-flash.go {
+      animation: flashIn 0.6s ease-out;
+    }
+
+    @keyframes flashIn {
+      0% { opacity: 0.85; }
+      100% { opacity: 0; }
+    }
+
+    /* ========== Profile ========== */
     .profile-header {
       text-align: center;
       margin-bottom: 24px;
@@ -382,7 +647,16 @@
       border-radius: 20px;
       font-size: 13px;
       box-shadow: var(--shadow-sm);
+      opacity: 0;
+      transform: translateY(6px);
+      transition: transform 0.2s, box-shadow 0.2s;
     }
+
+    .tag.show {
+      animation: fadeUp 0.4s ease forwards;
+    }
+
+    .tag:active { transform: scale(0.95); }
 
     .score-card {
       background: linear-gradient(135deg, #fce4ec, #ede7f6);
@@ -428,12 +702,14 @@
       border-radius: 28px;
       cursor: pointer;
       box-shadow: 0 8px 24px rgba(196, 92, 122, 0.3);
-      transition: transform 0.2s, box-shadow 0.2s;
       font-family: inherit;
+      position: relative;
+      overflow: hidden;
     }
 
+    .btn-primary:hover { filter: brightness(1.04); transform: translateY(-1px); }
     .btn-primary:active {
-      transform: scale(0.97);
+      transform: scale(0.96);
       box-shadow: 0 4px 12px rgba(196, 92, 122, 0.25);
     }
 
@@ -448,12 +724,14 @@
       cursor: pointer;
       margin-top: 10px;
       font-family: inherit;
-      transition: background 0.2s;
     }
 
-    .btn-ghost:active { background: rgba(247, 182, 200, 0.2); }
+    .btn-ghost:active {
+      background: rgba(247, 182, 200, 0.22);
+      transform: scale(0.97);
+    }
 
-    /* Chat */
+    /* ========== Chat ========== */
     .chat-header-name {
       text-align: center;
       font-size: 16px;
@@ -488,7 +766,8 @@
       border-radius: 18px;
       font-size: 14px;
       line-height: 1.55;
-      animation: bubbleIn 0.4s ease backwards;
+      opacity: 0;
+      transform: translateY(12px) scale(0.96);
     }
 
     .bubble.them {
@@ -506,15 +785,13 @@
       border-bottom-right-radius: 6px;
     }
 
-    .bubble:nth-child(1) { animation-delay: 0.1s; }
-    .bubble:nth-child(2) { animation-delay: 0.25s; }
-    .bubble:nth-child(3) { animation-delay: 0.4s; }
-    .bubble:nth-child(4) { animation-delay: 0.55s; }
-    .bubble:nth-child(5) { animation-delay: 0.7s; }
+    .bubble.show {
+      animation: bubbleIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
 
     @keyframes bubbleIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; transform: translateY(12px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     .chat-input-bar {
@@ -544,7 +821,9 @@
       cursor: pointer;
     }
 
-    /* Date planner */
+    .send-btn:active { transform: scale(0.88); }
+
+    /* ========== Date planner ========== */
     .date-card {
       background: var(--white);
       border-radius: var(--radius);
@@ -557,6 +836,8 @@
     .date-emoji {
       font-size: 48px;
       margin-bottom: 12px;
+      display: inline-block;
+      animation: floatPulse 2.8s ease-in-out infinite;
     }
 
     .date-title {
@@ -626,8 +907,10 @@
     }
 
     .btn-accept:active, .btn-maybe:active, .btn-another:active {
-      transform: scale(0.97);
+      transform: scale(0.96);
     }
+
+    .btn-accept:hover { filter: brightness(1.04); }
 
     /* Success overlay */
     .success-overlay {
@@ -643,12 +926,14 @@
       text-align: center;
       opacity: 0;
       visibility: hidden;
-      transition: opacity 0.4s, visibility 0.4s;
+      transform: scale(0.94);
+      transition: opacity 0.4s, visibility 0.4s, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     .success-overlay.show {
       opacity: 1;
       visibility: visible;
+      transform: scale(1);
     }
 
     .success-icon {
@@ -671,7 +956,7 @@
       margin-bottom: 28px;
     }
 
-    /* Letter / secret note */
+    /* Letter */
     .letter-paper {
       background: var(--white);
       border-radius: var(--radius);
@@ -679,6 +964,14 @@
       box-shadow: var(--shadow);
       position: relative;
       min-height: 360px;
+      transform: translateY(12px);
+      opacity: 0;
+      transition: opacity 0.5s 0.1s, transform 0.5s 0.1s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    #screen-letter.active .letter-paper {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .letter-paper::before {
@@ -718,6 +1011,7 @@
       margin-top: 24px;
       font-size: 32px;
       opacity: 0.7;
+      animation: floatPulse 3s ease-in-out infinite;
     }
 
     /* Bottom nav */
@@ -737,8 +1031,8 @@
       z-index: 10;
       opacity: 0;
       visibility: hidden;
-      transform: translateY(20px);
-      transition: opacity 0.35s, transform 0.35s, visibility 0.35s;
+      transform: translateY(24px);
+      transition: opacity 0.4s, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.4s;
     }
 
     .bottom-nav.visible {
@@ -759,13 +1053,20 @@
       color: var(--text-soft);
       font-size: 10px;
       font-family: inherit;
-      transition: color 0.2s;
+      border-radius: 12px;
     }
 
-    .nav-item .nav-ico { font-size: 22px; line-height: 1; }
-    .nav-item.active { color: var(--rose); }
+    .nav-item .nav-ico {
+      font-size: 22px;
+      line-height: 1;
+      transition: transform 0.25s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
 
-    /* Back button in screens */
+    .nav-item.active { color: var(--rose); }
+    .nav-item.active .nav-ico { transform: scale(1.12) translateY(-1px); }
+    .nav-item:active { transform: scale(0.9); }
+    .nav-item:active .nav-ico { transform: scale(0.92); }
+
     .back-row {
       display: flex;
       align-items: center;
@@ -788,6 +1089,8 @@
       justify-content: center;
     }
 
+    .back-btn:active { transform: scale(0.88); }
+
     .page-heading {
       font-size: 17px;
       font-weight: 600;
@@ -796,7 +1099,6 @@
       margin-right: 36px;
     }
 
-    /* Toast */
     .toast {
       position: absolute;
       bottom: calc(80px + var(--safe-bottom));
@@ -809,7 +1111,7 @@
       font-size: 13px;
       opacity: 0;
       visibility: hidden;
-      transition: all 0.3s;
+      transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
       z-index: 30;
       white-space: nowrap;
     }
@@ -820,13 +1122,12 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    .home-only-note {
-      margin-top: 20px;
-      text-align: center;
-      font-size: 12px;
-      color: var(--text-soft);
-      line-height: 1.6;
-      padding: 0 12px;
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
   </style>
 </head>
@@ -835,12 +1136,21 @@
     <div class="screens">
 
       <!-- 1. Splash -->
-      <section class="screen active" id="screen-splash" onclick="enterApp()">
-        <div class="splash-lock">🔒 专属上锁</div>
-        <div class="splash-heart">💕</div>
-        <h1 class="splash-title">只想和你</h1>
-        <p class="splash-sub">为你做的约会软件</p>
-        <p class="splash-hint">轻触解锁 · 进入</p>
+      <section class="screen active" id="screen-splash">
+        <div class="splash-particles" id="splash-particles" aria-hidden="true"></div>
+        <div class="splash-content">
+          <div class="splash-lock">🔒 专属上锁</div>
+          <div class="splash-heart" id="splash-heart">💕</div>
+          <h1 class="splash-title">只想和你</h1>
+          <p class="splash-sub">为你做的约会软件</p>
+          <div class="splash-match-area">
+            <div class="splash-match-text" id="splash-match-text">正在为你匹配…</div>
+            <div class="splash-progress-track">
+              <div class="splash-progress-bar" id="splash-progress"></div>
+            </div>
+          </div>
+        </div>
+        <p class="splash-hint" id="splash-hint">轻触解锁 · 进入</p>
       </section>
 
       <!-- 2. Home -->
@@ -849,7 +1159,8 @@
           <div class="brand">只想和你 <span>Only Us</span></div>
           <button class="icon-btn" onclick="goTo('letter')" title="秘密信笺" aria-label="秘密信笺">✉️</button>
         </div>
-        <div class="match-card" onclick="goTo('profile')">
+        <div class="match-card" id="match-card" onclick="goTo('profile')">
+          <div class="match-flash" id="match-flash"></div>
           <div class="match-photo">
             <div class="only-badge">✨ 唯一匹配</div>
             <div class="avatar-ring">
@@ -868,8 +1179,9 @@
             </div>
           </div>
         </div>
-        <p class="hint-tap">点击卡片查看详情 ›</p>
-        <p class="home-only-note">这里没有别人。<br/>只有你，和想约你的那个人。</p>
+        <p class="hint-tap" id="hint-tap">点击卡片查看详情 ›</p>
+        <p class="home-only-note" id="home-only-note">这里没有别人。<br/>只有你，和想约你的那个人。</p>
+        <div class="burst-layer" id="burst-layer" aria-hidden="true"></div>
       </section>
 
       <!-- 3. Profile -->
@@ -974,7 +1286,6 @@
 
     </div>
 
-    <!-- Bottom nav -->
     <nav class="bottom-nav" id="bottom-nav">
       <button class="nav-item active" data-screen="home" onclick="goTo('home')">
         <span class="nav-ico">🏠</span>
@@ -1038,14 +1349,23 @@
 
     /* ========== App logic ========== */
     const SCREENS = ["splash", "home", "profile", "chat", "date", "letter"];
+    const NAV_ORDER = ["home", "chat", "date", "letter"];
     let current = "splash";
     let entered = false;
+    let splashReady = false;
+    let matchRevealed = false;
+    let chatAnimated = false;
 
     function $(id) { return document.getElementById(id); }
 
+    function haptic(ms) {
+      try {
+        if (navigator.vibrate) navigator.vibrate(ms || 12);
+      } catch (e) {}
+    }
+
     function applyConfig() {
       const c = CONFIG;
-      // 短昵称（含 emoji）整段展示；更长则取首个可见字符
       const chars = Array.from(c.crushName);
       const initial = chars.length <= 3 ? c.crushName : chars[0];
 
@@ -1071,10 +1391,11 @@
 
       const tagsEl = $("interest-tags");
       tagsEl.innerHTML = "";
-      c.interests.forEach(function (t) {
+      c.interests.forEach(function (t, i) {
         const span = document.createElement("span");
         span.className = "tag";
         span.textContent = t;
+        span.style.animationDelay = (0.05 * i) + "s";
         tagsEl.appendChild(span);
       });
 
@@ -1088,39 +1409,204 @@
       });
     }
 
-    function enterApp() {
-      if (entered) return;
-      entered = true;
-      goTo("home");
-      $("bottom-nav").classList.add("visible");
+    /* —— Splash particles —— */
+    function spawnSplashParticles() {
+      const layer = $("splash-particles");
+      if (!layer) return;
+      const glyphs = ["💗", "💕", "✨", "🌸", "💞", "♡"];
+      for (var i = 0; i < 18; i++) {
+        var el = document.createElement("span");
+        el.className = "splash-particle";
+        el.textContent = glyphs[i % glyphs.length];
+        el.style.left = (Math.random() * 92 + 4) + "%";
+        el.style.bottom = (-5 - Math.random() * 20) + "%";
+        el.style.fontSize = (10 + Math.random() * 14) + "px";
+        el.style.animationDuration = (6 + Math.random() * 7) + "s";
+        el.style.animationDelay = (Math.random() * 4) + "s";
+        layer.appendChild(el);
+      }
     }
 
-    function goTo(name) {
+    function runSplashMatch() {
+      var bar = $("splash-progress");
+      var text = $("splash-match-text");
+      var hint = $("splash-hint");
+      var splash = $("screen-splash");
+      var progress = 0;
+      var stages = [
+        { at: 0, msg: "正在为你匹配…" },
+        { at: 28, msg: "扫描星河里的信号…" },
+        { at: 55, msg: "发现唯一对象…" },
+        { at: 82, msg: "锁定中…" },
+        { at: 100, msg: "匹配完成 · 99%" }
+      ];
+
+      var timer = setInterval(function () {
+        progress += 1.6 + Math.random() * 2.2;
+        if (progress > 100) progress = 100;
+        bar.style.width = progress + "%";
+
+        for (var i = stages.length - 1; i >= 0; i--) {
+          if (progress >= stages[i].at) {
+            text.textContent = stages[i].msg;
+            break;
+          }
+        }
+
+        if (progress >= 100) {
+          clearInterval(timer);
+          splashReady = true;
+          text.textContent = "匹配完成 · 唯一结果";
+          hint.classList.add("ready");
+          splash.style.cursor = "pointer";
+          splash.addEventListener("click", enterApp);
+          splash.addEventListener("keydown", function (e) {
+            if (e.key === "Enter" || e.key === " ") enterApp();
+          });
+        }
+      }, 40);
+    }
+
+    function enterApp() {
+      if (entered || !splashReady) return;
+      entered = true;
+      haptic([10, 30, 14]);
+
+      var splash = $("screen-splash");
+      splash.classList.add("unlocked");
+      splash.classList.remove("active");
+
+      setTimeout(function () {
+        goTo("home", { fromSplash: true });
+        $("bottom-nav").classList.add("visible");
+        revealMatch();
+      }, 420);
+    }
+
+    function revealMatch() {
+      if (matchRevealed) return;
+      matchRevealed = true;
+      var card = $("match-card");
+      card.classList.add("revealed");
+
+      setTimeout(function () {
+        burstHearts();
+        $("match-flash").classList.add("go");
+        animateCompatCount();
+        haptic(18);
+      }, 480);
+
+      setTimeout(function () {
+        $("hint-tap").classList.add("show");
+        $("home-only-note").classList.add("show");
+      }, 900);
+    }
+
+    function burstHearts() {
+      var layer = $("burst-layer");
+      if (!layer) return;
+      layer.innerHTML = "";
+      var glyphs = ["💗", "💕", "✨", "💖", "🌸", "💞", "♡", "❤️"];
+      for (var i = 0; i < 16; i++) {
+        var el = document.createElement("span");
+        el.className = "burst-heart";
+        el.textContent = glyphs[i % glyphs.length];
+        var angle = (Math.PI * 2 * i) / 16 + (Math.random() - 0.5) * 0.4;
+        var dist = 70 + Math.random() * 110;
+        el.style.setProperty("--dx", Math.cos(angle) * dist + "px");
+        el.style.setProperty("--dy", Math.sin(angle) * dist - 20 + "px");
+        el.style.setProperty("--rot", (Math.random() * 80 - 40) + "deg");
+        el.style.fontSize = (14 + Math.random() * 14) + "px";
+        el.style.animationDelay = (Math.random() * 0.12) + "s";
+        layer.appendChild(el);
+        (function (node) {
+          requestAnimationFrame(function () { node.classList.add("go"); });
+        })(el);
+      }
+      setTimeout(function () { layer.innerHTML = ""; }, 1300);
+    }
+
+    function animateCompatCount() {
+      var el = $("compat-home");
+      var target = CONFIG.compatibility;
+      var n = 0;
+      el.classList.add("counting");
+      var step = setInterval(function () {
+        n += 3;
+        if (n >= target) {
+          n = target;
+          clearInterval(step);
+          el.classList.remove("counting");
+        }
+        el.textContent = n + "%";
+      }, 28);
+    }
+
+    function goTo(name, opts) {
+      opts = opts || {};
       if (name === current && entered) return;
-      const prev = $("screen-" + current);
-      const next = $("screen-" + name);
+      var prevName = current;
+      var prev = $("screen-" + prevName);
+      var next = $("screen-" + name);
       if (!next) return;
 
-      if (prev) {
+      var prevIdx = NAV_ORDER.indexOf(prevName);
+      var nextIdx = NAV_ORDER.indexOf(name);
+      var goingForward = nextIdx >= prevIdx;
+
+      if (prev && prevName !== "splash") {
         prev.classList.remove("active");
+        prev.classList.remove("exit-left", "exit-right", "enter-from-left");
+        prev.classList.add(goingForward ? "exit-left" : "exit-right");
+        setTimeout(function () {
+          prev.classList.remove("exit-left", "exit-right");
+        }, 420);
+      } else if (prev) {
+        prev.classList.remove("active");
+      }
+
+      next.classList.remove("exit-left", "exit-right", "enter-from-left");
+      if (!opts.fromSplash && prevName !== "splash" && !goingForward) {
+        next.classList.add("enter-from-left");
+        void next.offsetWidth; // reflow so reverse slide animates
+        next.classList.remove("enter-from-left");
       }
       next.classList.add("active");
       current = name;
 
-      // Nav highlight
       document.querySelectorAll(".nav-item").forEach(function (el) {
         el.classList.toggle("active", el.dataset.screen === name ||
           (name === "profile" && el.dataset.screen === "home"));
       });
 
-      // Show nav after splash
       if (name !== "splash") {
         $("bottom-nav").classList.add("visible");
       }
+
+      if (name === "home" && entered) revealMatch();
+      if (name === "profile") animateTags();
+      if (name === "chat") animateBubbles();
+    }
+
+    function animateTags() {
+      document.querySelectorAll("#interest-tags .tag").forEach(function (t, i) {
+        t.classList.remove("show");
+        setTimeout(function () { t.classList.add("show"); }, 40 + i * 60);
+      });
+    }
+
+    function animateBubbles() {
+      var bubbles = document.querySelectorAll("#chat-bubbles .bubble");
+      bubbles.forEach(function (b) { b.classList.remove("show"); });
+      bubbles.forEach(function (b, i) {
+        setTimeout(function () { b.classList.add("show"); }, 80 + i * 140);
+      });
+      chatAnimated = true;
     }
 
     function showToast(msg) {
-      const t = $("toast");
+      haptic(8);
+      var t = $("toast");
       t.textContent = msg;
       t.classList.add("show");
       clearTimeout(showToast._timer);
@@ -1130,13 +1616,16 @@
     }
 
     function acceptDate() {
+      haptic([12, 40, 12]);
       $("success-title").textContent = "太好了 💕";
       $("success-msg").innerHTML =
         "已记下：" + CONFIG.dateTime + "<br/>在「" + CONFIG.place + "」等你。<br/><br/>不见不散。";
       $("success-overlay").classList.add("show");
+      burstHeartsIn(document.getElementById("screen-date"));
     }
 
     function maybeDate() {
+      haptic(8);
       $("success-title").textContent = "没关系";
       $("success-msg").innerHTML =
         "慢慢想就好。<br/>邀约一直有效，<br/>等你准备好了再来点「好呀」。";
@@ -1144,6 +1633,7 @@
     }
 
     function anotherTime() {
+      haptic(8);
       $("success-title").textContent = "好的";
       $("success-msg").innerHTML =
         "时间可以再商量。<br/>地点还是「" + CONFIG.place + "」附近？<br/><br/>你说了算。";
@@ -1154,11 +1644,34 @@
       $("success-overlay").classList.remove("show");
     }
 
-    // Swipe navigation (optional polish)
+    function burstHeartsIn(container) {
+      if (!container) return;
+      var layer = document.createElement("div");
+      layer.className = "burst-layer";
+      layer.style.zIndex = "25";
+      container.appendChild(layer);
+      var glyphs = ["💗", "✨", "🌸", "💕"];
+      for (var i = 0; i < 12; i++) {
+        var el = document.createElement("span");
+        el.className = "burst-heart";
+        el.textContent = glyphs[i % glyphs.length];
+        var angle = (Math.PI * 2 * i) / 12;
+        var dist = 60 + Math.random() * 90;
+        el.style.top = "38%";
+        el.style.setProperty("--dx", Math.cos(angle) * dist + "px");
+        el.style.setProperty("--dy", Math.sin(angle) * dist + "px");
+        el.style.setProperty("--rot", (Math.random() * 60 - 30) + "deg");
+        layer.appendChild(el);
+        (function (node) {
+          requestAnimationFrame(function () { node.classList.add("go"); });
+        })(el);
+      }
+      setTimeout(function () { layer.remove(); }, 1200);
+    }
+
     (function enableSwipe() {
-      let startX = 0, startY = 0;
-      const order = ["home", "chat", "date", "letter"];
-      const el = document.querySelector(".screens");
+      var startX = 0, startY = 0;
+      var el = document.querySelector(".screens");
 
       el.addEventListener("touchstart", function (e) {
         startX = e.changedTouches[0].screenX;
@@ -1167,18 +1680,20 @@
 
       el.addEventListener("touchend", function (e) {
         if (current === "splash" || current === "profile") return;
-        const dx = e.changedTouches[0].screenX - startX;
-        const dy = e.changedTouches[0].screenY - startY;
+        var dx = e.changedTouches[0].screenX - startX;
+        var dy = e.changedTouches[0].screenY - startY;
         if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy)) return;
-        const idx = order.indexOf(current);
+        var idx = NAV_ORDER.indexOf(current);
         if (idx < 0) return;
-        if (dx < 0 && idx < order.length - 1) goTo(order[idx + 1]);
-        if (dx > 0 && idx > 0) goTo(order[idx - 1]);
+        if (dx < 0 && idx < NAV_ORDER.length - 1) goTo(NAV_ORDER[idx + 1]);
+        if (dx > 0 && idx > 0) goTo(NAV_ORDER[idx - 1]);
       }, { passive: true });
     })();
 
     // Init
     applyConfig();
+    spawnSplashParticles();
+    runSplashMatch();
   </script>
 </body>
 </html>
