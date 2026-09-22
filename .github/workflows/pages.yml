@@ -18,6 +18,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Decode index.html from gzip+base64 payload
+        run: |
+          python3 - <<'PY'
+          import base64, gzip
+          from pathlib import Path
+          b64 = Path('index.html.gz.b64').read_text().strip()
+          Path('index.html').write_bytes(gzip.decompress(base64.b64decode(b64)))
+          print('decoded', Path('index.html').stat().st_size, 'bytes')
+          PY
+          test -f index.html
+          grep -q '只想和你' index.html
+          grep -q '🐷妮' index.html
+          grep -q '正在为你匹配' index.html
       - uses: actions/configure-pages@v5
         with:
           enablement: true
