@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#f8e8f0" />
+  <title>只想和你 · Only Us</title>
+  <style>
+    :root {
+      --pink: #f7b6c8;
+      --pink-deep: #e8899f;
+      --lavender: #d4c4f0;
+      --lavender-deep: #b8a0e0;
+      --cream: #fff8f5;
+      --cream-dark: #f5ebe6;
+      --rose: #c45c7a;
+      --text: #4a3a42;
+      --text-soft: #8a7a82;
+      --white: #ffffff;
+      --shadow: 0 8px 32px rgba(196, 92, 122, 0.12);
+      --shadow-sm: 0 4px 16px rgba(196, 92, 122, 0.1);
+      --radius: 24px;
+      --radius-sm: 16px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", sans-serif;
+      background: linear-gradient(160deg, #f0e4f5 0%, #f8e8f0 40%, #fdeee8 100%);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    /* Desktop phone frame */
+    .phone-shell {
+      width: 100%;
+      max-width: 390px;
+      height: 100%;
+      max-height: 844px;
+      margin: 0 auto;
+      position: relative;
+      background: var(--cream);
+      box-shadow: 0 0 0 1px rgba(196, 92, 122, 0.08), var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    @media (min-width: 430px) {
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        min-height: 100vh;
+      }
+      .phone-shell {
+        height: min(844px, calc(100vh - 48px));
+        border-radius: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.8);
+      }
+    }
+
+    /* Screens */
+    .screens {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      padding: 20px 20px calc(72px + var(--safe-bottom));
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(30px);
+      transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .screen.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+      z-index: 2;
+    }
+
+    .screen.exit-left {
+      transform: translateX(-30px);
+      opacity: 0;
+    }
+
+    /* Splash */
+    #screen-splash {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: linear-gradient(180deg, #fdf0f5 0%, #f5e8f8 50%, #fdeee8 100%);
+      padding-bottom: 40px;
+      cursor: pointer;
+    }
+
+    .splash-heart {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--pink), var(--lavender));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      box-shadow: var(--shadow);
+      animation: floatPulse 2.4s ease-in-out infinite;
+      margin-bottom: 28px;
+    }
+
+    @keyframes floatPulse {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-10px) scale(1.04); }
+    }
+
+    .splash-lock {
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      color: var(--text-soft);
+      margin-bottom: 12px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.3s forwards;
+    }
+
+    .splash-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--rose);
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.5s forwards;
+    }
+
+    .splash-sub {
+      font-size: 15px;
+      color: var(--text-soft);
+      opacity: 0;
+      animation: fadeUp 0.8s 0.7s forwards;
+    }
+
+    .splash-hint {
+      position: absolute;
+      bottom: 48px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-soft);
+      opacity: 0;
+      animation: fadeBlink 2s 1.5s infinite;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeBlink {
+      0%, 100% { opacity: 0.35; }
+      50% { opacity: 0.9; }
+    }
+
+    /* Top bar */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-top: 8px;
+    }
+
+    .brand {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--rose);
+      letter-spacing: 0.04em;
+    }
+
+    .brand span {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-soft);
+      margin-left: 6px;
+      letter-spacing: 0;
+    }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: var(--white);
+      box-shadow: var(--shadow-sm);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+    }
+
+    .icon-btn:active { transform: scale(0.92); }
+
+    /* Match card */
+    .match-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s;
+    }
+
+    .match-card:active { transform: scale(0.98); }
+
+    .match-photo {
+      height: 320px;
+      background: linear-gradient(145deg, #f5d0dc 0%, #e8d4f5 45%, #fde8d8 100%);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .avatar-ring {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--pink-deep), var(--lavender-deep));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 12px 40px rgba(196, 92, 122, 0.25);
+      position: relative;
+    }
+
+    .avatar-ring::after {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .avatar-initial {
+      font-size: 52px;
+      color: white;
+      font-weight: 500;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .only-badge {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(8px);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--rose);
+      font-weight: 500;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .match-info {
+      padding: 20px 22px 24px;
+    }
+
+    .match-name {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .match-name .heart-mini {
+      font-size: 16px;
+      animation: heartbeat 1.5s ease-in-out infinite;
+    }
+
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      15% { transform: scale(1.2); }
+      30% { transform: scale(1); }
+    }
+
+    .match-bio {
+      font-size: 14px;
+      color: var(--text-soft);
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .compat-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(90deg, #fdf0f5, #f5eef8);
+      border-radius: 12px;
+      padding: 10px 14px;
+    }
+
+    .compat-score {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--rose);
+      min-width: 48px;
+    }
+
+    .compat-label {
+      font-size: 12px;
+      color: var(--text-soft);
+    }
+
+    .hint-tap {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--text-soft);
+      opacity: 0.8;
+    }
+
+    /* Profile */
+    .profile-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .profile-avatar {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--pink-deep), var(--lavender-deep));
+      margin: 0 auto 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      color: white;
+      box-shadow: var(--shadow);
+    }
+
+    .section-title {
+      font-size: 13px;
+      color: var(--text-soft);
+      letter-spacing: 0.1em;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .tag {
+      background: var(--white);
+      border: 1px solid rgba(232, 137, 159, 0.3);
+      color: var(--rose);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .score-card {
+      background: linear-gradient(135deg, #fce4ec, #ede7f6);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .score-big {
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--rose);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .score-desc {
+      font-size: 13px;
+      color: var(--text-soft);
+    }
+
+    .bio-card {
+      background: var(--white);
+      border-radius: var(--radius-sm);
+      padding: 16px 18px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+    }
+
+    .btn-primary {
+      width: 100%;
+      border: none;
+      background: linear-gradient(135deg, var(--pink-deep), var(--lavender-deep));
+      color: white;
+      font-size: 16px;
+      font-weight: 500;
+      padding: 16px;
+      border-radius: 28px;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(196, 92, 122, 0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+      font-family: inherit;
+    }
+
+    .btn-primary:active {
+      transform: scale(0.97);
+      box-shadow: 0 4px 12px rgba(196, 92, 122, 0.25);
+    }
+
+    .btn-ghost {
+      width: 100%;
+      border: 1.5px solid rgba(232, 137, 159, 0.4);
+      background: transparent;
+      color: var(--rose);
+      font-size: 15px;
+      padding: 14px;
+      border-radius: 28px;
+      cursor: pointer;
+      margin-top: 10px;
+      font-family: inherit;
+      transition: background 0.2s;
+    }
+
+    .btn-ghost:active { background: rgba(247, 182, 200, 0.2); }
+
+    /* Chat */
+    .chat-header-name {
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .chat-status {
+      text-align: center;
+      font-size: 12px;
+      color: #7cb87c;
+      margin-bottom: 20px;
+    }
+
+    .chat-status::before {
+      content: "●";
+      margin-right: 4px;
+      font-size: 8px;
+    }
+
+    .chat-bubbles {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .bubble {
+      max-width: 78%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.55;
+      animation: bubbleIn 0.4s ease backwards;
+    }
+
+    .bubble.them {
+      align-self: flex-start;
+      background: var(--white);
+      border-bottom-left-radius: 6px;
+      box-shadow: var(--shadow-sm);
+      color: var(--text);
+    }
+
+    .bubble.me {
+      align-self: flex-end;
+      background: linear-gradient(135deg, var(--pink-deep), #d4a0c0);
+      color: white;
+      border-bottom-right-radius: 6px;
+    }
+
+    .bubble:nth-child(1) { animation-delay: 0.1s; }
+    .bubble:nth-child(2) { animation-delay: 0.25s; }
+    .bubble:nth-child(3) { animation-delay: 0.4s; }
+    .bubble:nth-child(4) { animation-delay: 0.55s; }
+    .bubble:nth-child(5) { animation-delay: 0.7s; }
+
+    @keyframes bubbleIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .chat-input-bar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: var(--white);
+      border-radius: 24px;
+      padding: 8px 8px 8px 18px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .chat-input-bar span {
+      flex: 1;
+      font-size: 13px;
+      color: var(--text-soft);
+    }
+
+    .send-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, var(--pink-deep), var(--lavender-deep));
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    /* Date planner */
+    .date-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      box-shadow: var(--shadow);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .date-emoji {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .date-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+
+    .date-detail {
+      background: linear-gradient(135deg, #fdf0f5, #f5eef8);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      margin-bottom: 8px;
+      text-align: left;
+    }
+
+    .date-detail-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      font-size: 15px;
+    }
+
+    .date-detail-row .ico {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: var(--shadow-sm);
+      flex-shrink: 0;
+    }
+
+    .date-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-accept {
+      background: linear-gradient(135deg, #e8899f, #c45c7a);
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 28px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      box-shadow: 0 8px 24px rgba(196, 92, 122, 0.3);
+    }
+
+    .btn-maybe, .btn-another {
+      background: var(--white);
+      border: 1.5px solid rgba(232, 137, 159, 0.35);
+      color: var(--text);
+      padding: 14px;
+      border-radius: 28px;
+      font-size: 15px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .btn-accept:active, .btn-maybe:active, .btn-another:active {
+      transform: scale(0.97);
+    }
+
+    /* Success overlay */
+    .success-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 248, 245, 0.96);
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      text-align: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.4s, visibility 0.4s;
+    }
+
+    .success-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .success-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      animation: floatPulse 2s ease-in-out infinite;
+    }
+
+    .success-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--rose);
+      margin-bottom: 10px;
+    }
+
+    .success-msg {
+      font-size: 15px;
+      color: var(--text-soft);
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+
+    /* Letter / secret note */
+    .letter-paper {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      box-shadow: var(--shadow);
+      position: relative;
+      min-height: 360px;
+    }
+
+    .letter-paper::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 24px;
+      right: 24px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--pink), var(--lavender));
+      border-radius: 0 0 2px 2px;
+    }
+
+    .letter-to {
+      font-size: 14px;
+      color: var(--text-soft);
+      margin-bottom: 20px;
+    }
+
+    .letter-body {
+      font-size: 16px;
+      line-height: 2;
+      color: var(--text);
+      white-space: pre-wrap;
+      margin-bottom: 28px;
+    }
+
+    .letter-from {
+      text-align: right;
+      font-size: 14px;
+      color: var(--rose);
+      font-weight: 500;
+    }
+
+    .letter-stamp {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 32px;
+      opacity: 0.7;
+    }
+
+    /* Bottom nav */
+    .bottom-nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: calc(64px + var(--safe-bottom));
+      padding-bottom: var(--safe-bottom);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(196, 92, 122, 0.08);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 10;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(20px);
+      transition: opacity 0.35s, transform 0.35s, visibility 0.35s;
+    }
+
+    .bottom-nav.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      color: var(--text-soft);
+      font-size: 10px;
+      font-family: inherit;
+      transition: color 0.2s;
+    }
+
+    .nav-item .nav-ico { font-size: 22px; line-height: 1; }
+    .nav-item.active { color: var(--rose); }
+
+    /* Back button in screens */
+    .back-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-top: 4px;
+    }
+
+    .back-btn {
+      border: none;
+      background: var(--white);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page-heading {
+      font-size: 17px;
+      font-weight: 600;
+      flex: 1;
+      text-align: center;
+      margin-right: 36px;
+    }
+
+    /* Toast */
+    .toast {
+      position: absolute;
+      bottom: calc(80px + var(--safe-bottom));
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(74, 58, 66, 0.88);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 13px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+      z-index: 30;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .home-only-note {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-soft);
+      line-height: 1.6;
+      padding: 0 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-shell" id="app">
+    <div class="screens">
+
+      <!-- 1. Splash -->
+      <section class="screen active" id="screen-splash" onclick="enterApp()">
+        <div class="splash-lock">🔒 专属上锁</div>
+        <div class="splash-heart">💕</div>
+        <h1 class="splash-title">只想和你</h1>
+        <p class="splash-sub">为你做的约会软件</p>
+        <p class="splash-hint">轻触解锁 · 进入</p>
+      </section>
+
+      <!-- 2. Home -->
+      <section class="screen" id="screen-home">
+        <div class="topbar">
+          <div class="brand">只想和你 <span>Only Us</span></div>
+          <button class="icon-btn" onclick="goTo('letter')" title="秘密信笺" aria-label="秘密信笺">✉️</button>
+        </div>
+        <div class="match-card" onclick="goTo('profile')">
+          <div class="match-photo">
+            <div class="only-badge">✨ 唯一匹配</div>
+            <div class="avatar-ring">
+              <span class="avatar-initial" id="crush-initial">🐷妮</span>
+            </div>
+          </div>
+          <div class="match-info">
+            <div class="match-name">
+              <span id="crush-name-home">🐷妮</span>
+              <span class="heart-mini">💗</span>
+            </div>
+            <p class="match-bio" id="crush-bio-home">喜欢安静的下午、好咖啡，和慢慢聊下去的对话。</p>
+            <div class="compat-bar">
+              <div class="compat-score" id="compat-home">99%</div>
+              <div class="compat-label">默契指数 · 系统只为你们匹配了对方</div>
+            </div>
+          </div>
+        </div>
+        <p class="hint-tap">点击卡片查看详情 ›</p>
+        <p class="home-only-note">这里没有别人。<br/>只有你，和想约你的那个人。</p>
+      </section>
+
+      <!-- 3. Profile -->
+      <section class="screen" id="screen-profile">
+        <div class="back-row">
+          <button class="back-btn" onclick="goTo('home')" aria-label="返回">‹</button>
+          <div class="page-heading">个人主页</div>
+        </div>
+        <div class="profile-header">
+          <div class="profile-avatar" id="crush-initial-profile">🐷妮</div>
+          <h2 id="crush-name-profile" style="font-size:22px;margin-bottom:4px;">🐷妮</h2>
+          <p style="font-size:13px;color:var(--text-soft);">想认识的那个人</p>
+        </div>
+        <div class="score-card">
+          <div class="score-big" id="compat-profile">99%</div>
+          <div class="score-desc">契合度 · 大概是命中注定的意思吧</div>
+        </div>
+        <div class="section-title">兴趣标签</div>
+        <div class="tags" id="interest-tags"></div>
+        <div class="section-title">关于 TA</div>
+        <div class="bio-card" id="crush-bio-profile">喜欢安静的下午、好咖啡，和慢慢聊下去的对话。不太会主动，但很认真对待每一次见面。</div>
+        <button class="btn-primary" onclick="goTo('chat')">发消息 💬</button>
+        <button class="btn-ghost" onclick="goTo('date')">邀约见面 ☕</button>
+      </section>
+
+      <!-- 4. Chat -->
+      <section class="screen" id="screen-chat">
+        <div class="back-row">
+          <button class="back-btn" onclick="goTo('profile')" aria-label="返回">‹</button>
+          <div class="page-heading" id="chat-title">🐷妮</div>
+        </div>
+        <div class="chat-header-name" id="chat-name">🐷妮</div>
+        <div class="chat-status">在线 · 专属对话</div>
+        <div class="chat-bubbles" id="chat-bubbles"></div>
+        <div class="chat-input-bar">
+          <span>说点什么吧…（演示预览）</span>
+          <button class="send-btn" onclick="showToast('这是演示预览哦 💫')" aria-label="发送">➤</button>
+        </div>
+        <button class="btn-ghost" style="margin-top:16px;" onclick="goTo('date')">去约会计划 ›</button>
+      </section>
+
+      <!-- 5. Date Planner -->
+      <section class="screen" id="screen-date">
+        <div class="back-row">
+          <button class="back-btn" onclick="goTo('home')" aria-label="返回">‹</button>
+          <div class="page-heading">约会计划</div>
+        </div>
+        <div class="date-card">
+          <div class="date-emoji" id="date-emoji">🥟</div>
+          <div class="date-title">想约你出来走走</div>
+          <div class="date-detail">
+            <div class="date-detail-row">
+              <div class="ico">📅</div>
+              <div>
+                <div style="font-size:12px;color:var(--text-soft);">时间</div>
+                <div id="date-time">10月3日 18:30</div>
+              </div>
+            </div>
+            <div class="date-detail-row">
+              <div class="ico">📍</div>
+              <div>
+                <div style="font-size:12px;color:var(--text-soft);">地点</div>
+                <div id="date-place">小笼包聚会</div>
+              </div>
+            </div>
+            <div class="date-detail-row">
+              <div class="ico">👤</div>
+              <div>
+                <div style="font-size:12px;color:var(--text-soft);">邀请人</div>
+                <div id="date-from">我</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="date-actions" id="date-actions">
+          <button class="btn-accept" onclick="acceptDate()">好呀，我来 ✓</button>
+          <button class="btn-maybe" onclick="maybeDate()">再想想…</button>
+          <button class="btn-another" onclick="anotherTime()">换个时间？</button>
+        </div>
+
+        <div class="success-overlay" id="success-overlay">
+          <div class="success-icon">🌸</div>
+          <div class="success-title" id="success-title">太好了</div>
+          <div class="success-msg" id="success-msg"></div>
+          <button class="btn-primary" style="max-width:220px;" onclick="closeSuccess()">好的 💕</button>
+        </div>
+      </section>
+
+      <!-- 6. Secret note -->
+      <section class="screen" id="screen-letter">
+        <div class="back-row">
+          <button class="back-btn" onclick="goTo('home')" aria-label="返回">‹</button>
+          <div class="page-heading">秘密信笺</div>
+        </div>
+        <div class="letter-paper">
+          <div class="letter-to" id="letter-to">致 🐷妮：</div>
+          <div class="letter-body" id="letter-body"></div>
+          <div class="letter-from" id="letter-from">—— 我</div>
+          <div class="letter-stamp">💌</div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Bottom nav -->
+    <nav class="bottom-nav" id="bottom-nav">
+      <button class="nav-item active" data-screen="home" onclick="goTo('home')">
+        <span class="nav-ico">🏠</span>
+        <span>首页</span>
+      </button>
+      <button class="nav-item" data-screen="chat" onclick="goTo('chat')">
+        <span class="nav-ico">💬</span>
+        <span>聊天</span>
+      </button>
+      <button class="nav-item" data-screen="date" onclick="goTo('date')">
+        <span class="nav-ico">☕</span>
+        <span>约会</span>
+      </button>
+      <button class="nav-item" data-screen="letter" onclick="goTo('letter')">
+        <span class="nav-ico">✉️</span>
+        <span>信笺</span>
+      </button>
+    </nav>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script>
+    /* ============================================================
+       ✏️ 自定义配置 —— 改这里就能变成「只给你」的版本
+       ============================================================ */
+    const CONFIG = {
+      // 产品名（一般不用改）
+      appName: "只想和你",
+      appNameEn: "Only Us",
+
+      // 对方昵称 / 你的名字
+      crushName: "🐷妮",
+      myName: "我",
+
+      // 简介
+      bio: "喜欢安静的下午、好咖啡，和慢慢聊下去的对话。不太会主动，但很认真对待每一次见面。",
+
+      // 兴趣标签
+      interests: ["咖啡", "散步", "看电影", "下雨天", "晚风"],
+
+      // 契合度（显示用）
+      compatibility: 99,
+
+      // 约会时间 & 地点（2026-10-03 18:30）
+      dateTime: "10月3日 18:30",
+      place: "小笼包聚会",
+
+      // 聊天预览气泡：from 为 "them"（对方）或 "me"（你）
+      chatLines: [
+        { from: "them", text: "嗨… 这个软件是你做的吗？" },
+        { from: "me", text: "嗯，只给你用的。别人注册不了。" },
+        { from: "them", text: "……有点犯规了吧" },
+        { from: "me", text: "那 10月3日傍晚，一起去吃小笼包？" },
+        { from: "them", text: "让我想想… 其实已经想好了 ☺️" },
+      ],
+
+      // 秘密信笺正文（支持换行）
+      letter: "做这个不是想找别人，\n是只想约你。\n\n世界很大，匹配可以很多，\n但我把选项删到只剩一个。\n\n如果你也刚好想见面——\n那就，赴约吧。",
+    };
+
+    /* ========== App logic ========== */
+    const SCREENS = ["splash", "home", "profile", "chat", "date", "letter"];
+    let current = "splash";
+    let entered = false;
+
+    function $(id) { return document.getElementById(id); }
+
+    function applyConfig() {
+      const c = CONFIG;
+      // 短昵称（含 emoji）整段展示；更长则取首个可见字符
+      const chars = Array.from(c.crushName);
+      const initial = chars.length <= 3 ? c.crushName : chars[0];
+
+      $("crush-initial").textContent = initial;
+      $("crush-initial-profile").textContent = initial;
+      $("crush-name-home").textContent = c.crushName;
+      $("crush-name-profile").textContent = c.crushName;
+      $("crush-bio-home").textContent = c.bio.split("。")[0] + "。";
+      $("crush-bio-profile").textContent = c.bio;
+      $("compat-home").textContent = c.compatibility + "%";
+      $("compat-profile").textContent = c.compatibility + "%";
+      $("chat-title").textContent = c.crushName;
+      $("chat-name").textContent = c.crushName;
+      $("date-time").textContent = c.dateTime;
+      $("date-place").textContent = c.place;
+      $("date-from").textContent = c.myName;
+      if ($("date-emoji")) {
+        $("date-emoji").textContent = /小笼包|包子|饺子|面/.test(c.place) ? "🥟" : "☕";
+      }
+      $("letter-to").textContent = "致 " + c.crushName + "：";
+      $("letter-from").textContent = "—— " + c.myName;
+      $("letter-body").textContent = c.letter;
+
+      const tagsEl = $("interest-tags");
+      tagsEl.innerHTML = "";
+      c.interests.forEach(function (t) {
+        const span = document.createElement("span");
+        span.className = "tag";
+        span.textContent = t;
+        tagsEl.appendChild(span);
+      });
+
+      const bubbles = $("chat-bubbles");
+      bubbles.innerHTML = "";
+      c.chatLines.forEach(function (line) {
+        const div = document.createElement("div");
+        div.className = "bubble " + (line.from === "me" ? "me" : "them");
+        div.textContent = line.text;
+        bubbles.appendChild(div);
+      });
+    }
+
+    function enterApp() {
+      if (entered) return;
+      entered = true;
+      goTo("home");
+      $("bottom-nav").classList.add("visible");
+    }
+
+    function goTo(name) {
+      if (name === current && entered) return;
+      const prev = $("screen-" + current);
+      const next = $("screen-" + name);
+      if (!next) return;
+
+      if (prev) {
+        prev.classList.remove("active");
+      }
+      next.classList.add("active");
+      current = name;
+
+      // Nav highlight
+      document.querySelectorAll(".nav-item").forEach(function (el) {
+        el.classList.toggle("active", el.dataset.screen === name ||
+          (name === "profile" && el.dataset.screen === "home"));
+      });
+
+      // Show nav after splash
+      if (name !== "splash") {
+        $("bottom-nav").classList.add("visible");
+      }
+    }
+
+    function showToast(msg) {
+      const t = $("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(function () {
+        t.classList.remove("show");
+      }, 2200);
+    }
+
+    function acceptDate() {
+      $("success-title").textContent = "太好了 💕";
+      $("success-msg").innerHTML =
+        "已记下：" + CONFIG.dateTime + "<br/>在「" + CONFIG.place + "」等你。<br/><br/>不见不散。";
+      $("success-overlay").classList.add("show");
+    }
+
+    function maybeDate() {
+      $("success-title").textContent = "没关系";
+      $("success-msg").innerHTML =
+        "慢慢想就好。<br/>邀约一直有效，<br/>等你准备好了再来点「好呀」。";
+      $("success-overlay").classList.add("show");
+    }
+
+    function anotherTime() {
+      $("success-title").textContent = "好的";
+      $("success-msg").innerHTML =
+        "时间可以再商量。<br/>地点还是「" + CONFIG.place + "」附近？<br/><br/>你说了算。";
+      $("success-overlay").classList.add("show");
+    }
+
+    function closeSuccess() {
+      $("success-overlay").classList.remove("show");
+    }
+
+    // Swipe navigation (optional polish)
+    (function enableSwipe() {
+      let startX = 0, startY = 0;
+      const order = ["home", "chat", "date", "letter"];
+      const el = document.querySelector(".screens");
+
+      el.addEventListener("touchstart", function (e) {
+        startX = e.changedTouches[0].screenX;
+        startY = e.changedTouches[0].screenY;
+      }, { passive: true });
+
+      el.addEventListener("touchend", function (e) {
+        if (current === "splash" || current === "profile") return;
+        const dx = e.changedTouches[0].screenX - startX;
+        const dy = e.changedTouches[0].screenY - startY;
+        if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy)) return;
+        const idx = order.indexOf(current);
+        if (idx < 0) return;
+        if (dx < 0 && idx < order.length - 1) goTo(order[idx + 1]);
+        if (dx > 0 && idx > 0) goTo(order[idx - 1]);
+      }, { passive: true });
+    })();
+
+    // Init
+    applyConfig();
+  </script>
+</body>
+</html>
