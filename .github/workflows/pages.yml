@@ -4,40 +4,63 @@ on:
     branches: [main]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 concurrency:
   group: pages
   cancel-in-progress: true
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  prepare:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Repair and decode index.html.gz.b64
+      - name: Repair b64 payload and write index.html
         run: |
           python3 - <<'PY'
           import base64, gzip
           from pathlib import Path
           b64 = list(Path('index.html.gz.b64').read_text().strip())
-          # Repair known transcription corruptions from a prior push
           for i, ch in [(886, '6'), (3082, '7'), (9189, 'R'), (10935, 'T')]:
               b64[i] = ch
           html = gzip.decompress(base64.b64decode(''.join(b64)))
           Path('index.html').write_bytes(html)
+          Path('index.html.gz.b64').write_text(''.join(b64) + '\n')
           text = html.decode('utf-8')
           assert '只想和你' in text and '🐷妮' in text and '正在为你匹配' in text
           print('decoded', len(html), 'bytes OK')
           PY
-      - uses: actions/configure-pages@v5
+      - name: Commit repaired site files to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html index.html.gz.b64
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update Only Us animated demo (decoded index.html). [skip ci]"
+            git push
+          fi
+      - uses: actions/upload-artifact@v4
         with:
-          enablement: true
+          name: site
+          path: |
+            index.html
+            .nojekyll
+  deploy:
+    needs: prepare
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: site
+      - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: site
       - id: deployment
         uses: actions/deploy-pages@v4
