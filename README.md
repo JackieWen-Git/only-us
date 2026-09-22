@@ -2,15 +2,16 @@
 
 Animated dating-app demo (WeChat-friendly HTML).
 
-## Live URL
+## Live URL (long-lived, text/html)
 
-After GitHub Pages is enabled: https://jackiewen-git.github.io/only-us/
+**https://jackiewen-git.github.io/**
 
-## One-time setup (if the site 404s)
+Also: https://jackiewen-git.github.io/index.html
 
-1. Open https://github.com/JackieWen-Git/only-us/settings/pages
-2. Under **Build and deployment** → **Source**, choose **GitHub Actions**
-   (or **Deploy from a branch** → `main` → `/ (root)`)
-3. Save, then re-run the **Deploy to GitHub Pages** workflow (Actions tab → Run workflow).
+Hosted on GitHub Pages (user site `JackieWen-Git.github.io`), sourced from this repo’s animated `index.html`.
+
+Optional project URL (needs one Settings enable if still 404):
+https://jackiewen-git.github.io/only-us/
+→ https://github.com/JackieWen-Git/only-us/settings/pages → Source: **GitHub Actions** (or branch `main` / root), then re-run the workflow.
 
 CONFIG: crushName 🐷妮 · dateTime 10月3日 18:30 · place 小笼包聚会
